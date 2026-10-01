@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronDown,
   Heart,
@@ -17,10 +17,23 @@ const wedding = {
   brideParents: "Daughter of Mr. Pramod Kumar & Mrs. Kumari Smita Sinha",
   groomParents: "Son of Lt. Ashok Kumar & Lt. Pratima Kumari",
   dateISO: "2026-12-11T19:00:00+05:30",
+  date: "11 December 2026",
   venue: "Rajgir Residency",
   address: "Near Kund Par, Rajgir, Nalanda, Bihar, India",
-  maps: "https://maps.google.com/?q=Rajgir+Residency+Rajgir+Nalanda",
+  maps:
+    "https://maps.google.com/?q=Rajgir+Residency+Rajgir+Nalanda",
   hashtag: "#PreetiWedsAmit",
+};
+
+const COLORS = {
+  velvet: "#5A1830",
+  darkVelvet: "#3E0F21",
+  silver: "#F1F2F4",
+  silverWhite: "#FAFAFB",
+  silverBorder: "#C9CBD0",
+  softSilver: "#E5E6E9",
+  text: "#4D454A",
+  muted: "#756D73",
 };
 
 function SectionTitle({
@@ -31,22 +44,42 @@ function SectionTitle({
   title: string;
 }) {
   return (
-    <div className="text-center mb-10">
-      <p className="uppercase tracking-[.35em] text-xs text-[#a7793d]">
+    <div className="text-center mb-12">
+      <p
+        className="uppercase tracking-[0.35em] text-xs mb-3"
+        style={{ color: COLORS.velvet }}
+      >
         {eyebrow}
       </p>
 
-      <h2 className="serif text-5xl md:text-6xl mt-2">
+      <h2
+        className="font-serif text-4xl md:text-5xl"
+        style={{ color: COLORS.velvet }}
+      >
         {title}
       </h2>
 
-      <div className="gold-line w-28 mx-auto mt-5" />
+      <div className="flex items-center justify-center gap-3 mt-5">
+        <span
+          className="w-16 h-px"
+          style={{ backgroundColor: COLORS.silverBorder }}
+        />
+        <Heart
+          size={15}
+          fill={COLORS.velvet}
+          style={{ color: COLORS.velvet }}
+        />
+        <span
+          className="w-16 h-px"
+          style={{ backgroundColor: COLORS.silverBorder }}
+        />
+      </div>
     </div>
   );
 }
 
 function Countdown() {
-  const [time, setTime] = useState({
+  const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
@@ -54,40 +87,72 @@ function Countdown() {
   });
 
   useEffect(() => {
-    const update = () => {
-      const difference = Math.max(
-        0,
-        new Date(wedding.dateISO).getTime() - Date.now()
-      );
+    const target = new Date(wedding.dateISO).getTime();
 
-      setTime({
-        days: Math.floor(difference / 86400000),
-        hours: Math.floor(difference / 3600000) % 24,
-        minutes: Math.floor(difference / 60000) % 60,
-        seconds: Math.floor(difference / 1000) % 60,
+    const update = () => {
+      const difference = target - Date.now();
+
+      if (difference <= 0) {
+        setTimeLeft({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        });
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor(
+          (difference / (1000 * 60 * 60)) % 24
+        ),
+        minutes: Math.floor(
+          (difference / (1000 * 60)) % 60
+        ),
+        seconds: Math.floor(
+          (difference / 1000) % 60
+        ),
       });
     };
 
     update();
 
-    const timer = setInterval(update, 1000);
+    const interval = setInterval(update, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, []);
 
+  const items = [
+    ["Days", timeLeft.days],
+    ["Hours", timeLeft.hours],
+    ["Minutes", timeLeft.minutes],
+    ["Seconds", timeLeft.seconds],
+  ];
+
   return (
-    <div className="grid grid-cols-4 gap-2 max-w-lg mx-auto">
-      {Object.entries(time).map(([key, value]) => (
+    <div className="grid grid-cols-4 gap-2 max-w-xl mx-auto">
+      {items.map(([label, value]) => (
         <div
-          key={key}
-          className="rounded-2xl border border-[#a7793d]/25 bg-white/60 py-4"
+          key={label}
+          className="rounded-2xl py-4 px-2 border backdrop-blur-sm"
+          style={{
+            backgroundColor: "rgba(255,255,255,0.6)",
+            borderColor: COLORS.silverBorder,
+          }}
         >
-          <div className="serif text-3xl">
+          <div
+            className="text-2xl md:text-4xl font-serif"
+            style={{ color: COLORS.velvet }}
+          >
             {String(value).padStart(2, "0")}
           </div>
 
-          <div className="text-[10px] uppercase tracking-[.2em] opacity-60">
-            {key}
+          <div
+            className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] mt-1"
+            style={{ color: COLORS.muted }}
+          >
+            {label}
           </div>
         </div>
       ))}
@@ -96,536 +161,708 @@ function Countdown() {
 }
 
 function ScratchDate() {
-  const [revealed, setRevealed] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const scratch = () => {
-    const next = Math.min(progress + 25, 100);
-    setProgress(next);
-
-    if (next >= 100) {
-      setRevealed(true);
-    }
+    setProgress((previous) =>
+      Math.min(previous + 25, 100)
+    );
   };
 
+  const revealed = progress >= 100;
+
   return (
-    <div className="relative max-w-sm mx-auto h-52 rounded-[2rem] border border-[#a7793d]/30 bg-[#efe3cf] p-3 shadow-sm">
-      <div className="h-full rounded-[1.5rem] border border-[#a7793d]/25 flex flex-col items-center justify-center bg-[#fffaf1] text-center">
-        <span className="text-xs uppercase tracking-[.3em] opacity-60">
-          Save the Date
-        </span>
+    <div className="text-center">
+      <p
+        className="uppercase tracking-[0.3em] text-[10px] mb-5"
+        style={{ color: COLORS.muted }}
+      >
+        A little surprise
+      </p>
 
-        {revealed ? (
-          <>
-            <div className="serif text-5xl mt-2">11</div>
-
-            <div className="tracking-[.25em] text-sm">
-              DECEMBER · 2026
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="serif text-3xl mt-3">
-              Scratch to reveal
-            </div>
-
-            <button
-              onClick={scratch}
-              className="mt-5 rounded-full border border-[#a7793d] px-5 py-2 text-xs tracking-[.2em] uppercase"
+      <button
+        onClick={scratch}
+        className="relative mx-auto block w-72 h-32 rounded-3xl overflow-hidden border shadow-sm"
+        style={{
+          backgroundColor: COLORS.silverWhite,
+          borderColor: COLORS.silverBorder,
+        }}
+      >
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div>
+            <p
+              className="font-serif text-2xl"
+              style={{ color: COLORS.velvet }}
             >
-              Scratch {progress}%
-            </button>
-          </>
+              {revealed ? "11 DECEMBER 2026" : "Scratch to reveal"}
+            </p>
+
+            {!revealed && (
+              <p
+                className="text-xs mt-2"
+                style={{ color: COLORS.muted }}
+              >
+                Tap here ✨
+              </p>
+            )}
+          </div>
+        </div>
+
+        {!revealed && (
+          <div
+            className="absolute inset-0 flex items-center justify-center transition-all duration-500"
+            style={{
+              backgroundColor: COLORS.velvet,
+              opacity: Math.max(0, 1 - progress / 100),
+            }}
+          >
+            <Sparkles
+              size={25}
+              className="text-white"
+            />
+          </div>
         )}
-      </div>
+      </button>
 
       {!revealed && (
-        <div
-          className="absolute inset-3 pointer-events-none rounded-[1.5rem]"
-          style={{
-            opacity: Math.max(0.12, 1 - progress / 100),
-            background:
-              "repeating-linear-gradient(135deg,#c5ad88 0 10px,#b59b74 10px 20px)",
-          }}
-        />
+        <p
+          className="text-[10px] mt-4 uppercase tracking-[0.2em]"
+          style={{ color: COLORS.muted }}
+        >
+          Tap multiple times to reveal
+        </p>
       )}
     </div>
   );
 }
 
+const events = [
+  {
+    date: "09 DEC",
+    title: "Haldi",
+    time: "10:00 AM",
+    description:
+      "A joyful morning filled with colours, laughter and blessings.",
+    icon: "🌼",
+  },
+  {
+    date: "09 DEC",
+    title: "Mehendi",
+    time: "05:00 PM",
+    description:
+      "An evening of mehendi, music and beautiful memories.",
+    icon: "🌿",
+  },
+  {
+    date: "10 DEC",
+    title: "Sangeet",
+    time: "07:00 PM",
+    description:
+      "A magical evening of music, dance and celebrations.",
+    icon: "🎶",
+  },
+  {
+    date: "11 DEC",
+    title: "Wedding",
+    time: "07:00 PM",
+    description:
+      "The beautiful beginning of our forever.",
+    icon: "💍",
+  },
+  {
+    date: "12 DEC",
+    title: "Reception",
+    time: "07:00 PM",
+    description:
+      "Join us for dinner, blessings and celebration.",
+    icon: "✨",
+  },
+];
+
 export default function WeddingInvitation() {
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
 
-  const [form, setForm] = useState({
-    name: "",
-    guests: "2",
-    attending: "yes",
-    message: "",
-  });
+  const submitRSVP = (event: React.FormEvent) => {
+    event.preventDefault();
 
-  const events = [
-    {
-      title: "Lagan Chumaban & Mathmangra",
-      time: "09 DECEMBER",
-      location: "Kachahariya",
-      text: "Traditional family celebrations and auspicious rituals.",
-    },
-    {
-      title: "Mehendi & Sangeet",
-      time: "10 DECEMBER",
-      location: "Rajgir Residency",
-      text: "An evening of mehendi, music, dance and togetherness.",
-    },
-    {
-      title: "Mandapacchadan & Dev Pooja",
-      time: "11 DECEMBER",
-      location: "Rajgir Residency",
-      text: "Sacred rituals and blessings as the wedding celebrations begin.",
-    },
-    {
-      title: "Haldi Kalash & Dhritdhari",
-      time: "11 DECEMBER",
-      location: "Rajgir Residency",
-      text: "Joyful haldi traditions with family and loved ones.",
-    },
-    {
-      title: "Baarat Aagman & Preetibhoj",
-      time: "11 DECEMBER · 7 PM",
-      location: "Rajgir Residency",
-      text: "Welcoming the baarat followed by the wedding feast.",
-    },
-    {
-      title: "Shubh Vivaah",
-      time: "11 DECEMBER · NIGHT",
-      location: "Rajgir Residency",
-      text: "With blessings of our families, Preeti & Amit begin their forever.",
-    },
-  ];
+    if (!name.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+
+    alert(
+      `Thank you ${name}! Your RSVP has been received.`
+    );
+
+    setName("");
+    setMessage("");
+  };
 
   if (!started) {
     return (
-      <main className="min-h-screen paper noise flex items-center justify-center px-6 text-center">
-        <div className="max-w-2xl reveal">
-          <div className="float text-6xl mb-7">
-            ॐ
-          </div>
-
-          <p className="serif text-xl tracking-[.18em]">
-            ॥ श्री गणेशाय नमः ॥
+      <main
+        className="min-h-screen flex items-center justify-center px-6"
+        style={{
+          background: `
+            radial-gradient(
+              circle at 20% 20%,
+              rgba(255,255,255,0.95),
+              transparent 35%
+            ),
+            linear-gradient(
+              135deg,
+              ${COLORS.silverWhite},
+              ${COLORS.silver}
+            )
+          `,
+        }}
+      >
+        <div className="text-center max-w-lg">
+          <p
+            className="uppercase tracking-[0.45em] text-xs mb-6"
+            style={{ color: COLORS.velvet }}
+          >
+            Together with their families
           </p>
 
-          <p className="serif text-lg leading-relaxed mt-4 opacity-80">
-            वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ
-            <br />
-            निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा ॥
-          </p>
-
-          <div className="gold-line w-32 mx-auto my-8" />
-
-          <p className="uppercase tracking-[.28em] text-xs opacity-60">
-            With the blessings of Shri Ganesh and our beloved families
-          </p>
-
-          <h1 className="script text-7xl md:text-9xl mt-5">
-            Preeti
+          <h1
+            className="font-serif text-6xl md:text-8xl"
+            style={{ color: COLORS.velvet }}
+          >
+            {wedding.bride}
           </h1>
 
-          <div className="serif text-3xl my-1">
+          <div
+            className="text-3xl my-3 font-serif"
+            style={{ color: COLORS.muted }}
+          >
             &
           </div>
 
-          <h1 className="script text-7xl md:text-9xl">
-            Amit
+          <h1
+            className="font-serif text-6xl md:text-8xl"
+            style={{ color: COLORS.velvet }}
+          >
+            {wedding.groom}
           </h1>
 
-          <p className="serif text-lg mt-5 opacity-75">
-            Pramod Kumar & Kumari Smita Sinha
-            <br />
-            &
-            <br />
-            Lt. Ashok Kumar & Lt. Pratima Kumari
+          <p
+            className="mt-8 text-sm"
+            style={{ color: COLORS.muted }}
+          >
+            Invite you to celebrate their wedding
           </p>
 
           <button
             onClick={() => setStarted(true)}
-            className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#3e3028] text-white px-7 py-3 uppercase tracking-[.18em] text-xs shadow-lg"
+            className="mt-10 px-9 py-4 rounded-full text-white uppercase tracking-[0.25em] text-xs transition-transform hover:scale-105"
+            style={{
+              backgroundColor: COLORS.velvet,
+              boxShadow: `0 15px 40px rgba(90,24,48,0.22)`,
+            }}
           >
             Open Invitation
-            <ChevronDown size={15} />
           </button>
+
+          <div className="mt-8">
+            <ChevronDown
+              size={20}
+              className="mx-auto animate-bounce"
+              style={{ color: COLORS.velvet }}
+            />
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="paper noise">
+    <main
+      className="min-h-screen"
+      style={{
+        backgroundColor: COLORS.silver,
+        color: COLORS.text,
+      }}
+    >
+      {/* MUSIC BUTTON */}
+      <button
+        onClick={() => setPlaying(!playing)}
+        aria-label="Toggle music"
+        className="fixed right-5 top-5 z-50 w-12 h-12 rounded-full flex items-center justify-center shadow-lg border"
+        style={{
+          backgroundColor: COLORS.silverWhite,
+          borderColor: COLORS.silverBorder,
+          color: COLORS.velvet,
+        }}
+      >
+        {playing ? <Pause size={18} /> : <Music2 size={18} />}
+      </button>
 
       {/* HERO */}
-
-      <header className="min-h-screen flex flex-col justify-center items-center text-center px-6 relative">
-
-        <div className="absolute top-6 right-6">
-          <button
-            onClick={() => setPlaying(!playing)}
-            className="rounded-full border border-[#a7793d]/30 p-3 bg-white/50"
-          >
-            {playing ? (
-              <Pause size={17} />
-            ) : (
-              <Music2 size={17} />
-            )}
-          </button>
-        </div>
-
-        <p className="uppercase tracking-[.4em] text-xs text-[#a7793d]">
-          We are getting married
-        </p>
-
-        <h1 className="script text-8xl md:text-[10rem] leading-none mt-4">
-          Preeti
-        </h1>
-
-        <div className="serif text-5xl">
-          &
-        </div>
-
-        <h1 className="script text-8xl md:text-[10rem] leading-none">
-          Amit
-        </h1>
-
-        <p className="serif text-xl mt-8 max-w-xl opacity-75">
-          Two hearts. One beautiful beginning.
-        </p>
-
-        <a
-          href="#date"
-          className="absolute bottom-8 animate-bounce"
-        >
-          <ChevronDown />
-        </a>
-      </header>
-
-      {/* DATE */}
-
       <section
-        id="date"
-        className="py-24 px-6"
+        className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden"
+        style={{
+          background: `
+            radial-gradient(
+              circle at 50% 30%,
+              rgba(255,255,255,0.95),
+              transparent 45%
+            ),
+            linear-gradient(
+              180deg,
+              ${COLORS.silverWhite},
+              ${COLORS.silver}
+            )
+          `,
+        }}
       >
-        <SectionTitle
-          eyebrow="The Date"
-          title="Save the Date"
-        />
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute w-72 h-72 rounded-full blur-3xl opacity-30 -top-20 -left-20"
+            style={{ backgroundColor: COLORS.velvet }}
+          />
 
-        <p className="text-center opacity-65 mb-8">
-          Scratch below to reveal our wedding date
-        </p>
+          <div
+            className="absolute w-72 h-72 rounded-full blur-3xl opacity-20 -bottom-20 -right-20"
+            style={{ backgroundColor: COLORS.velvet }}
+          />
+        </div>
 
-        <ScratchDate />
+        <div className="relative text-center max-w-4xl">
+          <p
+            className="uppercase tracking-[0.5em] text-xs md:text-sm mb-7"
+            style={{ color: COLORS.velvet }}
+          >
+            We are getting married
+          </p>
+
+          <h1
+            className="font-serif text-7xl md:text-9xl leading-none"
+            style={{ color: COLORS.velvet }}
+          >
+            {wedding.bride}
+          </h1>
+
+          <div className="flex items-center justify-center gap-5 my-4">
+            <span
+              className="w-16 md:w-28 h-px"
+              style={{
+                backgroundColor: COLORS.silverBorder,
+              }}
+            />
+
+            <Heart
+              size={24}
+              fill={COLORS.velvet}
+              style={{ color: COLORS.velvet }}
+            />
+
+            <span
+              className="w-16 md:w-28 h-px"
+              style={{
+                backgroundColor: COLORS.silverBorder,
+              }}
+            />
+          </div>
+
+          <h1
+            className="font-serif text-7xl md:text-9xl leading-none"
+            style={{ color: COLORS.velvet }}
+          >
+            {wedding.groom}
+          </h1>
+
+          <p
+            className="mt-8 text-sm md:text-base"
+            style={{ color: COLORS.muted }}
+          >
+            {wedding.date}
+          </p>
+
+          <p
+            className="mt-2 text-sm"
+            style={{ color: COLORS.muted }}
+          >
+            {wedding.venue}
+          </p>
+
+          <div className="mt-12">
+            <Countdown />
+          </div>
+
+          <div className="mt-12">
+            <ChevronDown
+              size={22}
+              className="mx-auto animate-bounce"
+              style={{ color: COLORS.velvet }}
+            />
+          </div>
+        </div>
       </section>
 
-      {/* COUNTDOWN */}
-
-      <section className="py-24 px-6 bg-[#f1e8d8]/55">
-        <SectionTitle
-          eyebrow="Counting the moments"
-          title="Until Forever"
-        />
-
-        <Countdown />
-      </section>
-
-      {/* STORY */}
-
+      {/* INTRO */}
       <section className="py-24 px-6">
-        <SectionTitle
-          eyebrow="Our Story"
-          title="Two hearts, one story"
-        />
+        <div className="max-w-4xl mx-auto text-center">
+          <SectionTitle
+            eyebrow="With love"
+            title="Two hearts, one beautiful journey"
+          />
 
-        <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
+          <p className="leading-8 max-w-2xl mx-auto">
+            With the blessings of our families, we invite
+            you to be a part of our special day as we begin
+            this beautiful journey together.
+          </p>
 
-          {[
-            [
-              "01",
-              "The Beginning",
-              "A beautiful meeting became a beautiful bond.",
-            ],
-            [
-              "02",
-              "The Promise",
-              "With every laugh and every little moment, our bond grew stronger.",
-            ],
-            [
-              "03",
-              "The Yes",
-              "And then came the beautiful question that changed everything.",
-            ],
-            [
-              "04",
-              "Forever",
-              "Now we invite the people we love to witness the beginning of our forever.",
-            ],
-          ].map(([number, title, text]) => (
-            <article
-              key={number}
-              className="rounded-3xl border border-[#a7793d]/20 bg-white/55 p-7"
+          <div className="grid md:grid-cols-2 gap-8 mt-14">
+            <div
+              className="rounded-3xl p-8 border"
+              style={{
+                backgroundColor: COLORS.silverWhite,
+                borderColor: COLORS.silverBorder,
+              }}
             >
-              <span className="text-xs tracking-[.3em] text-[#a7793d]">
-                {number}
-              </span>
+              <p
+                className="uppercase tracking-[0.25em] text-[10px] mb-4"
+                style={{ color: COLORS.velvet }}
+              >
+                The Bride
+              </p>
 
-              <h3 className="serif text-3xl mt-2">
-                {title}
+              <h3
+                className="font-serif text-3xl mb-4"
+                style={{ color: COLORS.velvet }}
+              >
+                {wedding.bride}
               </h3>
 
-              <p className="mt-3 leading-7 opacity-70">
-                {text}
+              <p className="text-sm leading-7">
+                {wedding.brideParents}
               </p>
-            </article>
-          ))}
+            </div>
 
+            <div
+              className="rounded-3xl p-8 border"
+              style={{
+                backgroundColor: COLORS.silverWhite,
+                borderColor: COLORS.silverBorder,
+              }}
+            >
+              <p
+                className="uppercase tracking-[0.25em] text-[10px] mb-4"
+                style={{ color: COLORS.velvet }}
+              >
+                The Groom
+              </p>
+
+              <h3
+                className="font-serif text-3xl mb-4"
+                style={{ color: COLORS.velvet }}
+              >
+                {wedding.groom}
+              </h3>
+
+              <p className="text-sm leading-7">
+                {wedding.groomParents}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DATE REVEAL */}
+      <section
+        className="py-24 px-6"
+        style={{
+          backgroundColor: COLORS.silverWhite,
+        }}
+      >
+        <div className="max-w-3xl mx-auto">
+          <SectionTitle
+            eyebrow="Save the date"
+            title="Our special day"
+          />
+
+          <ScratchDate />
         </div>
       </section>
 
       {/* EVENTS */}
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <SectionTitle
+            eyebrow="Celebrations"
+            title="Wedding Events"
+          />
 
-      <section className="py-24 px-6 bg-[#efe6d7]/65">
-        <SectionTitle
-          eyebrow="The Celebrations"
-          title="Join our festivities"
-        />
-
-        <div className="max-w-3xl mx-auto space-y-4">
-
-          {events.map((event, index) => (
-            <article
-              key={event.title}
-              className="flex gap-5 items-start rounded-3xl bg-white/65 border border-[#a7793d]/15 p-6"
-            >
-
-              <div className="w-12 h-12 rounded-full border border-[#a7793d]/40 flex items-center justify-center shrink-0">
-                <span className="serif">
-                  {index + 1}
-                </span>
-              </div>
-
-              <div className="flex-1">
-
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-
-                  <h3 className="serif text-2xl md:text-3xl">
-                    {event.title}
-                  </h3>
-
-                  <span className="text-xs tracking-[.18em] uppercase opacity-55">
-                    {event.time}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event, index) => (
+              <div
+                key={`${event.title}-${index}`}
+                className="rounded-3xl p-7 border transition-transform hover:-translate-y-1"
+                style={{
+                  backgroundColor: COLORS.silverWhite,
+                  borderColor: COLORS.silverBorder,
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <span
+                    className="text-xs uppercase tracking-[0.25em]"
+                    style={{ color: COLORS.velvet }}
+                  >
+                    {event.date}
                   </span>
 
+                  <span className="text-2xl">
+                    {event.icon}
+                  </span>
                 </div>
 
-                <p className="text-xs text-[#a7793d] mt-1">
-                  {event.location}
+                <h3
+                  className="font-serif text-3xl mt-6"
+                  style={{ color: COLORS.velvet }}
+                >
+                  {event.title}
+                </h3>
+
+                <p
+                  className="text-xs uppercase tracking-[0.2em] mt-3"
+                  style={{ color: COLORS.muted }}
+                >
+                  {event.time}
                 </p>
 
-                <p className="mt-2 opacity-65">
-                  {event.text}
+                <p className="text-sm leading-7 mt-5">
+                  {event.description}
                 </p>
-
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            </article>
-          ))}
+      {/* STORY */}
+      <section
+        className="py-24 px-6"
+        style={{
+          backgroundColor: COLORS.silverWhite,
+        }}
+      >
+        <div className="max-w-3xl mx-auto text-center">
+          <SectionTitle
+            eyebrow="Our story"
+            title="A beginning to forever"
+          />
 
+          <p className="leading-8">
+            Every beautiful story has a special beginning.
+            Ours is filled with moments, smiles, family,
+            friendship and countless memories that brought
+            us to this beautiful day.
+          </p>
+
+          <p
+            className="font-serif text-3xl md:text-4xl mt-10"
+            style={{ color: COLORS.velvet }}
+          >
+            And now, forever begins...
+          </p>
         </div>
       </section>
 
       {/* VENUE */}
-
       <section className="py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <SectionTitle
+            eyebrow="The venue"
+            title="Join us in Rajgir"
+          />
 
-        <SectionTitle
-          eyebrow="A place to celebrate"
-          title="The Venue"
-        />
-
-        <div className="max-w-3xl mx-auto rounded-[2rem] border border-[#a7793d]/20 bg-white/60 p-8 text-center">
-
-          <MapPin className="mx-auto text-[#a7793d]" />
-
-          <h3 className="serif text-4xl mt-3">
-            Rajgir Residency
-          </h3>
-
-          <p className="opacity-65 mt-2">
-            Near Kund Par, Rajgir,
-            <br />
-            Nalanda, Bihar, India
-          </p>
-
-          <a
-            href={wedding.maps}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex mt-6 rounded-full bg-[#3e3028] text-white px-6 py-3 text-xs uppercase tracking-[.2em]"
+          <div
+            className="rounded-3xl p-8 md:p-12 border text-center"
+            style={{
+              backgroundColor: COLORS.silverWhite,
+              borderColor: COLORS.silverBorder,
+            }}
           >
-            Get Directions
-          </a>
+            <MapPin
+              size={35}
+              className="mx-auto mb-5"
+              style={{ color: COLORS.velvet }}
+            />
 
+            <h3
+              className="font-serif text-4xl"
+              style={{ color: COLORS.velvet }}
+            >
+              {wedding.venue}
+            </h3>
+
+            <p
+              className="mt-5 text-sm leading-7"
+              style={{ color: COLORS.muted }}
+            >
+              {wedding.address}
+            </p>
+
+            <a
+              href={wedding.maps}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 mt-8 px-7 py-3 rounded-full text-white text-xs uppercase tracking-[0.2em]"
+              style={{
+                backgroundColor: COLORS.velvet,
+              }}
+            >
+              <MapPin size={15} />
+              Open in Maps
+            </a>
+          </div>
         </div>
-
       </section>
 
       {/* GALLERY */}
+      <section
+        className="py-24 px-6"
+        style={{
+          backgroundColor: COLORS.silverWhite,
+        }}
+      >
+        <div className="max-w-5xl mx-auto">
+          <SectionTitle
+            eyebrow="Memories"
+            title="Our Gallery"
+          />
 
-      <section className="py-24 px-6 bg-[#f1e8d8]/55">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((item) => (
+              <div
+                key={item}
+                className="aspect-square rounded-2xl border flex items-center justify-center overflow-hidden"
+                style={{
+                  backgroundColor: COLORS.silver,
+                  borderColor: COLORS.silverBorder,
+                }}
+              >
+                <div className="text-center">
+                  <Heart
+                    size={25}
+                    className="mx-auto mb-3"
+                    style={{ color: COLORS.velvet }}
+                  />
 
-        <SectionTitle
-          eyebrow="Moments to remember"
-          title="Our Gallery"
-        />
-
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-3">
-
-          {["01", "02", "03", "04", "05", "06"].map((number) => (
-
-            <div
-              key={number}
-              className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-[#ded0ba] to-[#f8f0e4] border border-[#a7793d]/15 flex items-center justify-center"
-            >
-
-              <div className="text-center opacity-45">
-
-                <Sparkles className="mx-auto" />
-
-                <span className="text-xs tracking-[.25em] mt-2 block">
-                  ADD PHOTO {number}
-                </span>
-
+                  <p
+                    className="text-[10px] uppercase tracking-[0.2em]"
+                    style={{ color: COLORS.muted }}
+                  >
+                    Your photo here
+                  </p>
+                </div>
               </div>
+            ))}
+          </div>
 
-            </div>
-
-          ))}
-
+          <p
+            className="text-center text-xs mt-7"
+            style={{ color: COLORS.muted }}
+          >
+            Photos can be added here later.
+          </p>
         </div>
-
       </section>
 
       {/* RSVP */}
-
       <section className="py-24 px-6">
-
-        <SectionTitle
-          eyebrow="We'd love to know"
-          title="RSVP"
-        />
-
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-
-            alert(
-              `Thank you, ${form.name || "friend"}! Your RSVP has been recorded.`
-            );
-          }}
-          className="max-w-xl mx-auto space-y-4"
-        >
-
-          <input
-            required
-            value={form.name}
-            onChange={(event) =>
-              setForm({
-                ...form,
-                name: event.target.value,
-              })
-            }
-            placeholder="Your name"
-            className="w-full rounded-2xl border border-[#a7793d]/20 bg-white/65 px-5 py-4 outline-none"
+        <div className="max-w-xl mx-auto">
+          <SectionTitle
+            eyebrow="Be our guest"
+            title="RSVP"
           />
 
-          <select
-            value={form.attending}
-            onChange={(event) =>
-              setForm({
-                ...form,
-                attending: event.target.value,
-              })
-            }
-            className="w-full rounded-2xl border border-[#a7793d]/20 bg-white/65 px-5 py-4"
+          <form
+            onSubmit={submitRSVP}
+            className="rounded-3xl p-8 border"
+            style={{
+              backgroundColor: COLORS.silverWhite,
+              borderColor: COLORS.silverBorder,
+            }}
           >
-            <option value="yes">
-              Joyfully attending
-            </option>
+            <label className="block text-xs uppercase tracking-[0.2em] mb-2">
+              Your Name
+            </label>
 
-            <option value="no">
-              Regretfully declining
-            </option>
-          </select>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              className="w-full rounded-xl px-4 py-3 outline-none border mb-6"
+              style={{
+                backgroundColor: COLORS.silver,
+                borderColor: COLORS.silverBorder,
+              }}
+            />
 
-          <select
-            value={form.guests}
-            onChange={(event) =>
-              setForm({
-                ...form,
-                guests: event.target.value,
-              })
-            }
-            className="w-full rounded-2xl border border-[#a7793d]/20 bg-white/65 px-5 py-4"
-          >
-            <option value="1">1 Guest</option>
-            <option value="2">2 Guests</option>
-            <option value="3">3 Guests</option>
-            <option value="4">4 Guests</option>
-          </select>
+            <label className="block text-xs uppercase tracking-[0.2em] mb-2">
+              Message
+            </label>
 
-          <textarea
-            value={form.message}
-            onChange={(event) =>
-              setForm({
-                ...form,
-                message: event.target.value,
-              })
-            }
-            placeholder="A message for the couple (optional)"
-            rows={4}
-            className="w-full rounded-2xl border border-[#a7793d]/20 bg-white/65 px-5 py-4 outline-none"
-          />
+            <textarea
+              value={message}
+              onChange={(e) =>
+                setMessage(e.target.value)
+              }
+              placeholder="Leave a message for the couple..."
+              rows={5}
+              className="w-full rounded-xl px-4 py-3 outline-none border resize-none"
+              style={{
+                backgroundColor: COLORS.silver,
+                borderColor: COLORS.silverBorder,
+              }}
+            />
 
-          <button
-            type="submit"
-            className="w-full rounded-full bg-[#3e3028] text-white py-4 uppercase tracking-[.2em] text-xs flex justify-center gap-2 items-center"
-          >
-            <Send size={15} />
-            Send RSVP
-          </button>
-
-        </form>
-
+            <button
+              type="submit"
+              className="w-full mt-6 rounded-xl py-4 text-white flex items-center justify-center gap-2 uppercase tracking-[0.2em] text-xs"
+              style={{
+                backgroundColor: COLORS.velvet,
+              }}
+            >
+              <Send size={16} />
+              Send RSVP
+            </button>
+          </form>
+        </div>
       </section>
 
       {/* FOOTER */}
+      <footer
+        className="py-20 px-6 text-center"
+        style={{
+          backgroundColor: COLORS.darkVelvet,
+          color: "#FFFFFF",
+        }}
+      >
+        <Heart
+          size={28}
+          fill="white"
+          className="mx-auto mb-6"
+        />
 
-      <footer className="py-20 px-6 text-center bg-[#3e3028] text-[#fbf6eb]">
+        <h2 className="font-serif text-4xl md:text-5xl">
+          {wedding.bride} & {wedding.groom}
+        </h2>
 
-        <Heart className="mx-auto fill-current" />
-
-        <div className="script text-6xl mt-4">
-          Preeti & Amit
-        </div>
-
-        <p className="mt-3 opacity-60">
+        <p className="mt-5 opacity-80">
           {wedding.hashtag}
         </p>
 
-        <p className="text-[10px] uppercase tracking-[.3em] opacity-45 mt-10">
+        <p className="text-[10px] uppercase tracking-[0.3em] opacity-50 mt-10">
           Made with love
         </p>
-
       </footer>
-
     </main>
   );
 }
